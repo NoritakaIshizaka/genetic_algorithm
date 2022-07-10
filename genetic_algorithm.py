@@ -1,5 +1,5 @@
 import random
-from sympy import Symbol
+from sympy import Symbol, evaluate
 import textwrap
 
 import genetic_algorithm_error
@@ -30,19 +30,46 @@ class GeneticAlgorithm(object):
 
 
     def getVariable(self):
-        return [Symbol('x_{}'.format(i)) for i in range(self.dimension)]
+        x = [Symbol('x_{}'.format(i)) for i in range(self.dimension)]
+        self.x = x
+        return x
 
 
     def setFitness(self, fitness):
-        self.fitness = fitness
+        if self.problem_type == 'min':
+            self.fitness =  fitness * (-1)
+        elif self.problem_type == 'max':
+            self.fitness = fitness
 
 
-    def cal(self, select_method = 'roulette', crossOver_method = 'one'):
+    def evaluateFitness(self, individuals):
+        evaluateResults = []
+        for individual in individuals:
+            evaluateResult = self.fitness.subs([(k, v) for k, v in zip(self.x, individual)])
+            evaluateResults.append([individual, evaluateResult])
+        return evaluateResults
+
+
+    def resolve(self, select_method = 'roulette', crossOver_method = 'one'):
         if self.var_type == 'bin':
             individuals = [[random.randint(0,1) for _ in range(self.dimension)] for _ in range(self.populations)]
         elif self.var_type == 'float':
             pass
-        print(individuals)
+        for i in range(self.generations):
+            evaluateResults = self.evaluateFitness(individuals=individuals)
+            sort_evaluateResults = sorted(evaluateResults, key=lambda x:x[1], reverse = True)
+
+
+    def crossOver(self):
+        pass
+
+
+    def select(self):
+        pass
+
+
+    def maturate(self):
+        pass
 
 
 def main():
@@ -59,7 +86,7 @@ def main():
     f = x[0] + x[1] + x[2]
     ga.setFitness(f)
     print(ga.fitness)
-    ga.cal()
+    ga.resolve()
 
 
 
